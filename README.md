@@ -1,0 +1,1 @@
+# cwa-qr-code-generator
