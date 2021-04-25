@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>CWA_title.png</file>
+    </qresource>
+</RCC>
