@@ -9,3 +9,7 @@ To build this, you need to have Qt Creator with Qt 5.15.2 and protobuf installed
 
 # Screenshot
 ![screenshot](https://github.com/CodeCrafter912/cwa-qr-code-generator/blob/main/resources/screenshots/example.png)
+
+# Used libraries
+- [QZXing](https://github.com/ftylitak/qzxing)
+- [protobuf](https://github.com/protocolbuffers/protobuf)
