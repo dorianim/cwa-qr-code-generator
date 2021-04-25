@@ -4,3 +4,6 @@ Its intended use is for permanent facilites. They can install this program on a 
 
 # Building
 To build this, you need to have Qt Creator with Qt 5.15.2 and protobuf installed on your system. You can then use the Qt creaor for building.
+
+# Screenshot
+![screenshot](https://github.com/CodeCrafter912/cwa-qr-code-generator/blob/main/resources/screenshots/example.png)
