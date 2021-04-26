@@ -15,7 +15,7 @@ type=7
 #  TEMPORARY_PRIVATE_EVENT = 11,
 #  TEMPORARY_WORSHIP_SERVICE = 12,
 
-description=Example Description
+description=Example ceck-in on {{date%dd.MM}} at {{time%hh:mm:ss}}
 address=Example Address
 defaultCheckinLengthInMinutes=120
 

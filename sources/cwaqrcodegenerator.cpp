@@ -4,33 +4,44 @@ CwaQrCodeGenerator::CwaQrCodeGenerator(QString configFilePath, QObject *parent) 
 {
     this->_configuration.isValid = false;
     this->_currentQrCodePayload = "";
+    this->_qrCodeIndex = 0;
 
     this->_readConfigFile(configFilePath);
     this->_generateQrCodePayload();
+
+    QTimer::singleShot(3000, [=] {
+        this->_generateQrCodePayload();
+    });
 }
 
 void CwaQrCodeGenerator::registerQMLImageProvider(QString configFilePath, QQmlEngine& engine)
 {
     CwaQrCodeGenerator* tmpGenerator = new CwaQrCodeGenerator(configFilePath);
     engine.rootContext()->setContextProperty("CwaQrCodeGenerator", tmpGenerator);
-    engine.addImageProvider(QLatin1String("CwaQrCode"), tmpGenerator);
+    engine.addImageProvider(QLatin1String("cwaqrcode"), tmpGenerator);
 }
 
-QVariantMap CwaQrCodeGenerator::getConfig() {
-    if (!this->_configuration.isValid)
+QVariantMap CwaQrCodeGenerator::currentQrCode() {
+    if (!this->_configuration.isValid) {
         return {
-        {"isValid", this->_configuration.isValid}
-    };
-
-    return {
-        {"type", this->_configuration.type},
-        {"description", this->_configuration.description},
-        {"address", this->_configuration.address},
-        {"defaultCheckinLengthInMinutes", this->_configuration.defaultCheckinLengthInMinutes},
-        {"startTimestamp", double(this->_configuration.startTimestamp)},
-        {"endTimestamp", double(this->_configuration.endTimestamp)},
-        {"isValid", this->_configuration.isValid}
-    };
+            {"description", ""},
+            {"address", ""},
+            {"imageUrl", "qrc:/CWA_icon.png"},
+            {"isValid", this->_configuration.isValid}
+        };
+    }
+    else {
+        return {
+            {"imageUrl", "image://cwaqrcode/" + QString::number(this->_qrCodeIndex)},
+            {"type", this->_configuration.type},
+            {"description", this->_resolvePlayceholders(this->_configuration.description)},
+            {"address", this->_resolvePlayceholders(this->_configuration.address)},
+            {"defaultCheckinLengthInMinutes", this->_configuration.defaultCheckinLengthInMinutes},
+            {"startTimestamp", double(this->_configuration.startTimestamp)},
+            {"endTimestamp", double(this->_configuration.endTimestamp)},
+            {"isValid", this->_configuration.isValid}
+        };
+    }
 }
 
 bool CwaQrCodeGenerator::_readConfigFile(QString path) {
@@ -75,14 +86,56 @@ std::string CwaQrCodeGenerator::_generateRandomSeed(uint legth) {
     return buf;
 }
 
+
+QString CwaQrCodeGenerator::_resolvePlayceholders(QString sourceString) {
+    QString resolvedString = sourceString;
+
+    QRegularExpression reg("\\{\\{[^\\%]+\%[^\\}]+\\}\\}", QRegularExpression::MultilineOption);
+    QRegularExpressionMatchIterator match = reg.globalMatch(sourceString);
+
+    if(match.isValid()) {
+        while (match.hasNext()) {
+            QString stringMatch = match.next().captured();
+
+            QString cleanedStringMatch = stringMatch;
+            cleanedStringMatch = cleanedStringMatch.replace("{{", "").replace("}}", "");
+
+            QString macroType = cleanedStringMatch.section("%", 0, 0);
+            QString macroOptions = cleanedStringMatch.section("%", 1);
+
+            QString resolvedMacro;
+            if(macroType == "date") {
+                resolvedMacro = QDate::currentDate().toString(macroOptions);
+            }
+            else if(macroType == "time") {
+                resolvedMacro = QDateTime::currentDateTime().toString(macroOptions);
+            }
+            else {
+                resolvedMacro = "{{INVALID}}";
+            }
+
+            resolvedString = resolvedString.replace(
+                                 stringMatch,
+                                 resolvedMacro
+                             );
+        }
+    }
+
+    return resolvedString;
+}
+
 bool CwaQrCodeGenerator::_generateQrCodePayload() {
     if (!this->_configuration.isValid)
         return false;
 
     TraceLocation locationData;
     locationData.set_version(1);
-    locationData.mutable_description()->assign(this->_configuration.description.toStdString());
-    locationData.mutable_address()->assign(this->_configuration.address.toStdString());
+    locationData.mutable_description()->assign(
+        this->_resolvePlayceholders(this->_configuration.description).toStdString()
+    );
+    locationData.mutable_address()->assign(
+        this->_resolvePlayceholders(this->_configuration.address).toStdString()
+    );
     if(this->_configuration.startTimestamp > 0)
         locationData.set_starttimestamp(this->_configuration.startTimestamp);
     if(this->_configuration.endTimestamp > 0)
@@ -112,18 +165,31 @@ bool CwaQrCodeGenerator::_generateQrCodePayload() {
 
     google::protobuf::ShutdownProtobufLibrary();
 
+    // force reload of frontend
+    this->_qrCodeIndex ++;
+    emit this->currentQrCodeChanged();
+
     return true;
 }
 
 QImage CwaQrCodeGenerator::requestImage(const QString &id, QSize *size, const QSize &requestedSize) {
     Q_UNUSED(id)
-    if(this->_currentQrCodePayload.isEmpty())
-        return QImage();
+    QImage result;
 
-    QString qrCodeContent = "https://e.coronawarn.app/?v=1#" + this->_currentQrCodePayload;
-    QZXingEncoderConfig encoderConfig(QZXing::EncoderFormat_QR_CODE, requestedSize, QZXing::EncodeErrorCorrectionLevel_M, false, false);
-    QImage result = QZXing::encodeData(qrCodeContent, encoderConfig);
+    if(this->_currentQrCodePayload.isEmpty()) {
+        result = QImage(":/CWA_icon.png");
+    }
+    else {
+        QString qrCodeContent = "https://e.coronawarn.app/?v=1#" + this->_currentQrCodePayload;
+        QZXingEncoderConfig encoderConfig(QZXing::EncoderFormat_QR_CODE, requestedSize, QZXing::EncodeErrorCorrectionLevel_M, false, false);
+        result = QZXing::encodeData(qrCodeContent, encoderConfig);
+    }
+
+    if(result.isNull()) {
+        // in case of errors, return an empty image
+        result = QPixmap(1,1).toImage();
+    }
+
     *size = result.size();
-
     return result;
 }

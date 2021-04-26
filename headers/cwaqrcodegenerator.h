@@ -8,6 +8,10 @@
 #include <QSettings>
 #include <qquickimageprovider.h>
 #include <QtQml/QQmlContext>
+#include <QTimer>
+#include <QDate>
+#include <QDateTime>
+#include <QRegularExpression>
 
 #include "QZXing.h"
 #include "trace_location.pb.h"
@@ -21,13 +25,14 @@ using ::internal::pt::QRCodePayload;
 class CwaQrCodeGenerator : public QObject, public QQuickImageProvider
 {
     Q_OBJECT
+    Q_PROPERTY(QVariant currentQrCode READ currentQrCode NOTIFY currentQrCodeChanged)
 public:
     explicit CwaQrCodeGenerator(QString configFilePath, QObject *parent = nullptr);
 
     static void registerQMLImageProvider(QString configFilePath, QQmlEngine& engine);
 
     Q_INVOKABLE QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize);
-    Q_INVOKABLE QVariantMap getConfig();
+    Q_INVOKABLE QVariantMap currentQrCode();
 
 private:
     typedef struct CwaLocationConfiguration {
@@ -50,12 +55,15 @@ private:
 
     CwaLocationConfiguration _configuration;
     QString _currentQrCodePayload;
+    double _qrCodeIndex;
 
     std::string _generateRandomSeed(uint legth);
     bool _readConfigFile(QString path);
     bool _generateQrCodePayload();
+    QString _resolvePlayceholders(QString sourceString);
 
 signals:
+    void currentQrCodeChanged();
 
 };
 

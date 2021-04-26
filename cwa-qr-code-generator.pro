@@ -45,4 +45,5 @@ CONFIG += qzxing_multimedia
 include(QZXing/QZXing.pri)
 
 DISTFILES += \
+    README.md \
     cwa-qr.conf.example

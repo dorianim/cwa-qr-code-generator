@@ -59,7 +59,7 @@ Window {
 
                                 fillMode: Image.PreserveAspectFit
 
-                                source: "image://CwaQrCode"
+                                source: CwaQrCodeGenerator.currentQrCode.imageUrl
 
                                 sourceSize.width: width
                                 sourceSize.height: width
@@ -76,7 +76,7 @@ Window {
                             font.pixelSize: height
                             font.family: defaultFont.name
 
-                            text: CwaQrCodeGenerator.getConfig().description
+                            text: CwaQrCodeGenerator.currentQrCode.description
                         }
 
                         Label {
@@ -88,7 +88,7 @@ Window {
                             font.pixelSize: height
                             font.family: defaultFont.name
 
-                            text: CwaQrCodeGenerator.getConfig().address
+                            text: CwaQrCodeGenerator.currentQrCode.address
                         }
                     }
                 }
