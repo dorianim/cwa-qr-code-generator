@@ -5,14 +5,19 @@ import QtQuick.Layouts 1.0
 
 Window {
     visible: true
-    width: 354 //(height / 9) * 16 //354
-    height: 501
+    width: screenWidth //354 //(height / 9) * 16 //354
+    height: screenHeight //501
     title: qsTr("CWA-Qr-code-generator")
 
     Page {
         id: app
 
         anchors.fill: parent
+
+        FontLoader {
+            id: defaultFont
+            source: "qrc:/Roboto-Regular.ttf"
+        }
 
         GridLayout {
             anchors.fill: parent
@@ -69,6 +74,8 @@ Window {
                             elide: Text.ElideRight
 
                             font.pixelSize: height
+                            font.family: defaultFont.name
+
                             text: CwaQrCodeGenerator.getConfig().description
                         }
 
@@ -79,6 +86,8 @@ Window {
                             elide: Text.ElideRight
 
                             font.pixelSize: height
+                            font.family: defaultFont.name
+
                             text: CwaQrCodeGenerator.getConfig().address
                         }
                     }

@@ -1,5 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QScreen>
+
 #include "cwaqrcodegenerator.h"
 #include "QZXing.h"
 
@@ -13,9 +15,17 @@ int main(int argc, char *argv[])
 #ifdef TEST_CONFIG
     CwaQrCodeGenerator::registerQMLImageProvider(TEST_CONFIG, engine);
 #else
-    // TODO: handle path, maybe using argv
-    CwaQrCodeGenerator::registerQMLImageProvider(TEST_CONFIG, engine);
+    if(argc != 2) {
+        qDebug() << "Usage: cwa-qr-code-generator <config file path>";
+        return 1;
+    }
+
+    CwaQrCodeGenerator::registerQMLImageProvider(argv[1], engine);
 #endif
+
+    QSize size = app.screens().first()->size();
+    engine.rootContext()->setContextProperty("screenHeight", size.height());
+    engine.rootContext()->setContextProperty("screenWidth", size.width());
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
