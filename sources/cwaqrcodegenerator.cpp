@@ -17,6 +17,11 @@ void CwaQrCodeGenerator::registerQMLImageProvider(QString configFilePath, QQmlEn
 }
 
 QVariantMap CwaQrCodeGenerator::getConfig() {
+    if (!this->_configuration.isValid)
+        return {
+        {"isValid", this->_configuration.isValid}
+    };
+
     return {
         {"type", this->_configuration.type},
         {"description", this->_configuration.description},
@@ -62,11 +67,9 @@ bool CwaQrCodeGenerator::_readConfigFile(QString path) {
 std::string CwaQrCodeGenerator::_generateRandomSeed(uint legth) {
     std::string buf;
     std::random_device engine;
-    // TODO: refactor
+
     for(uint i = 0; i < legth; i++) {
-        std::string bufBuf;
-        bufBuf = engine();
-        buf.append(bufBuf);
+        buf += engine();
     }
 
     return buf;

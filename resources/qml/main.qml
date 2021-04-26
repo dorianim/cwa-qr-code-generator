@@ -5,8 +5,8 @@ import QtQuick.Layouts 1.0
 
 Window {
     visible: true
-    width: (height / 9) * 16
-    height: 480
+    width: 354 //(height / 9) * 16 //354
+    height: 501
     title: qsTr("CWA-Qr-code-generator")
 
     Page {
@@ -14,38 +14,40 @@ Window {
 
         anchors.fill: parent
 
-        RowLayout {
+        GridLayout {
             anchors.fill: parent
 
+            rows: app.landscape() ? 1:2
+            columns: app.landscape() ? 2:1
+
             ColumnLayout {
-                Layout.preferredHeight: parent.height
-                Layout.preferredWidth: parent.width * 0.5
+                Layout.preferredHeight: app.landscape() ? parent.height : parent.height * 0.6
+                Layout.preferredWidth: app.landscape() ? parent.width * 0.5 : parent.width
 
                 Item {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: width
+                    id: qrCodeContainer
+                    Layout.preferredWidth: app.landscape() ? parent.width : parent.width
+                    Layout.preferredHeight: app.landscape() ? parent.height : parent.height
 
-                    Rectangle {
+                    Column {
                         anchors.centerIn: parent
+                        spacing: qrCodeOutline.margins * 0.1
 
-                        width: parent.width * 0.9
-                        height: width
+                        Image {
+                            id: qrCodeOutline
 
-                        radius: height * 0.05
+                            property int margins: app.landscape() ? qrCodeContainer.width * 0.2:qrCodeContainer.height * 0.2
 
-                        // from: b7dff7
-                        // to: bb1504
+                            width: app.landscape() ? height : Math.min(qrCodeContainer.width, qrCodeContainer.height) - margins
+                            height: app.landscape() ? Math.min(qrCodeContainer.height, qrCodeContainer.width) - margins : width
 
-                        gradient: Gradient {
-                            GradientStop { position: 0.0; color: "#b7dff7" }
-                            GradientStop { position: 1.5; color: "#bb1504" }
-                        }
+                            fillMode: Image.PreserveAspectFit
 
-                        Rectangle {
-                            anchors.fill: parent
-                            anchors.margins: parent.height * 0.025
-                            radius: width * 0.05 * 0.5
-                            color: "#ffffff"
+                            antialiasing: true
+                            mipmap: true
+
+                            source: "qrc:/pt-poster-qr-outline.png"
+
                             Image {
                                 anchors.fill: parent
                                 anchors.margins: parent.height * 0.05
@@ -55,77 +57,62 @@ Window {
                                 source: "image://CwaQrCode"
 
                                 sourceSize.width: width
-                                sourceSize.height: height
+                                sourceSize.height: width
                             }
+
+                        }
+
+                        Label {
+                            height: qrCodeOutline.margins * 0.2
+                            width: qrCodeOutline.width
+
+                            elide: Text.ElideRight
+
+                            font.pixelSize: height
+                            text: CwaQrCodeGenerator.getConfig().description
+                        }
+
+                        Label {
+                            height: qrCodeOutline.margins * 0.15
+                            width: qrCodeOutline.width
+
+                            elide: Text.ElideRight
+
+                            font.pixelSize: height
+                            text: CwaQrCodeGenerator.getConfig().address
                         }
                     }
                 }
             }
 
             ColumnLayout {
-                Layout.preferredHeight: parent.height
-                Layout.preferredWidth: parent.width * 0.5
+                Layout.preferredHeight: app.landscape() ? parent.height : parent.height * 0.4
+                Layout.preferredWidth: app.landscape() ? parent.width * 0.5 : parent.width
 
                 Item {
-                    Layout.preferredHeight: parent.height * 0.05
-                    Layout.fillWidth: true
-                }
-/*
-                Label {
-                    Layout.preferredHeight: parent.height * 0.2
-                    Layout.fillWidth: true
-                    height: Layout.preferredHeight
-
-                    color: "#00719b"
-
-                    font.bold: true
-                    font.pixelSize: height * 0.4
-
-                    horizontalAlignment: Text.AlignHCenter
-                    text: CwaQrCodeGenerator.getConfig().description
-                }
-
-                Label {
-                    Layout.preferredHeight: parent.height * 0.1
-                    Layout.fillWidth: true
-                    height: Layout.preferredHeight
-
-                    color: "#00719b"
-
-                    font.bold: false
-                    font.pixelSize: height * 0.4
-
-                    horizontalAlignment: Text.AlignHCenter
-                    text: CwaQrCodeGenerator.getConfig().address
-                }
-
-                Item {
-                    Layout.preferredHeight: parent.height * 0.05
-                    Layout.fillWidth: true
-                }*/
-
-                Label {
-                    Layout.preferredHeight: parent.height * 0.2
-                    Layout.fillWidth: true
-                    height: Layout.preferredHeight
-
-                    color: "#00719b"
-
-                    font.bold: false
-                    font.pixelSize: height * 0.4
-
-                    horizontalAlignment: Text.AlignHCenter
-                    text: qsTr("CHECK IN.\nSTOP THE VIRUS.")
-                }
-
-                Image {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: parent.height * 0.4
+                    Layout.preferredWidth: app.landscape() ? parent.width : parent.width
+                    Layout.maximumWidth: app.landscape() ? -1 : qrCodeOutline.width * 1.2
+                    Layout.preferredHeight: app.landscape() ? parent.height : parent.height
                     Layout.alignment: Layout.Center
-                    fillMode: Image.PreserveAspectFit
-                    source: "qrc:/CWA_title.png"
+
+                    Image {
+                        anchors.fill: parent
+                        anchors.margins: app.landscape() ? parent.width * 0.1 : parent.height * 0.1
+
+                        fillMode: Image.PreserveAspectFit
+
+                        antialiasing: true
+                        mipmap: true
+
+                        source: "qrc:/pt-poster-qr-disclaimer.png"
+                    }
                 }
             }
         }
+
+        function landscape() {
+            return app.height < app.width
+        }
+
     }
 }

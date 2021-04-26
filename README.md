@@ -8,7 +8,8 @@ All configuration (location descripton, address, ...) is loaded from a config fi
 To build this, you need to have Qt Creator with Qt 5.15.2 and protobuf installed on your system. You can then use the Qt creaor for building.
 
 # Screenshot
-![screenshot](https://github.com/CodeCrafter912/cwa-qr-code-generator/blob/main/resources/screenshots/example.png)
+![screenshot](https://github.com/CodeCrafter912/cwa-qr-code-generator/blob/main/resources/screenshots/portrait.png)
+![screenshot](https://github.com/CodeCrafter912/cwa-qr-code-generator/blob/main/resources/screenshots/landscape.png)
 
 # Used libraries
 - [QZXing](https://github.com/ftylitak/qzxing)

@@ -1,5 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file>CWA_title.png</file>
+        <file>pt-poster-qr-disclaimer.png</file>
+        <file>pt-poster-qr-outline.png</file>
     </qresource>
 </RCC>

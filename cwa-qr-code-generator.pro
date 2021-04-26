@@ -42,3 +42,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 CONFIG += qzxing_multimedia
 include(QZXing/QZXing.pri)
+
+DISTFILES += \
+    cwa-qr.conf.example
