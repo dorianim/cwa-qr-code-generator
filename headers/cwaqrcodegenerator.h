@@ -55,7 +55,7 @@ private:
 
     CwaLocationConfiguration _configuration;
     QString _currentQrCodePayload;
-    double _qrCodeIndex;
+    bool _qrCodeIndex;
 
     std::string _generateRandomSeed(uint legth);
     bool _readConfigFile(QString path);

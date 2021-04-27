@@ -1,21 +1,33 @@
+# This file should contain your qr-code configuration
+
 [location]
-type=7
+type=0
 # Avaiable types:
-#  UNSPECIFIED = 0,
-#  PERMANENT_OTHER = 1,
-#  TEMPORARY_OTHER = 2,
-#  PERMANENT_RETAIL = 3,
-#  PERMANENT_FOOD_SERVICE = 4,
-#  PERMANENT_CRAFT = 5,
-#  PERMANENT_WORKPLACE = 6,
-#  PERMANENT_EDUCATIONAL_INSTITUTION = 7,
-#  PERMANENT_PUBLIC_BUILDING = 8,
-#  TEMPORARY_CULTURAL_EVENT = 9,
-#  TEMPORARY_CLUB_ACTIVITY = 10,
-#  TEMPORARY_PRIVATE_EVENT = 11,
-#  TEMPORARY_WORSHIP_SERVICE = 12,
+#  Unspecified: 0
+# -- Places --
+#  Retail: 3
+#  Hospitality: 4
+#  Craft business: 5
+#  Workplace: 6
+#  Education facility: 7
+#  Public building: 8
+#  Other place: 1
+#
+# -- Events --
+#  Cultural event: 9
+#  Club activities: 10
+#  Private party: 11
+#  Religious service: 12
+#  Other event: 2
 
 description=Example check-in on {{date%dd.MM}}
 address=Example Address
 defaultCheckinLengthInMinutes=120
 
+# Only for events:
+#   These are UNIX timestamps. You can generate one
+#   over here: https://www.epochconverter.com/
+startTimestamp=1619502509
+endTimestamp=1619675309
+
+[renewal]
