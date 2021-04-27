@@ -1,7 +1,7 @@
 # This file should contain your qr-code configuration
 
 [location]
-type=0
+type=9
 # Avaiable types:
 #  Unspecified: 0
 # -- Places --
@@ -20,8 +20,11 @@ type=0
 #  Religious service: 12
 #  Other event: 2
 
-description=Example check-in on {{date%dd.MM}}
-address=Example Address
+# Available macros:
+# - {{date%<format>}} where <format> is in the format described here: https://doc.qt.io/qt-5/qdate.html#toString-2
+# - {{time%<format>}} where <format> is in the format described here: https://doc.qt.io/qt-5/qdatetime.html#toString-2
+description=Beispiel check-in am {{date%dd.MM.yyyy}}
+address=Beispiel Adresse (generiert am {{date%dd.MM.yyyy}} um {{time%hh:mm}})
 defaultCheckinLengthInMinutes=120
 
 # Only for events:
@@ -30,4 +33,9 @@ defaultCheckinLengthInMinutes=120
 startTimestamp=1619502509
 endTimestamp=1619675309
 
-[renewal]
+[regeneration]
+# The QR code will be regenerated at this time every day.
+# Please note that deployments without internet connection will alway have their clock started
+# at 00:00 once they are plugged into power.
+hour=4
+minute=0

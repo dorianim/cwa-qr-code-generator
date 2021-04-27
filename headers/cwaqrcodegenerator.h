@@ -26,13 +26,20 @@ class CwaQrCodeGenerator : public QObject, public QQuickImageProvider
 {
     Q_OBJECT
     Q_PROPERTY(QVariant currentQrCode READ currentQrCode NOTIFY currentQrCodeChanged)
+    Q_PROPERTY(QString remaningTimeUntilRegeneration READ remaningTimeUntilRegeneration NOTIFY remaningTimeUntilRegenerationChanged)
 public:
     explicit CwaQrCodeGenerator(QString configFilePath, QObject *parent = nullptr);
+
+    enum State {
+        Initializing,
+        Ready
+    };
 
     static void registerQMLImageProvider(QString configFilePath, QQmlEngine& engine);
 
     Q_INVOKABLE QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize);
     Q_INVOKABLE QVariantMap currentQrCode();
+    Q_INVOKABLE QString remaningTimeUntilRegeneration();
 
 private:
     typedef struct CwaLocationConfiguration {
@@ -45,6 +52,11 @@ private:
         bool isValid;
     } cwaQrCodeConfiguration_t;
 
+    typedef struct CwaRegenerationConfiguration {
+        int hour;
+        int minute;
+    } cwaRegenerationConfiguration_t;
+
     const QList<TraceLocationType> _temporaryLocationTypes = {
         TraceLocationType::LOCATION_TYPE_PERMANENT_OTHER,
         TraceLocationType::LOCATION_TYPE_TEMPORARY_CULTURAL_EVENT,
@@ -53,17 +65,23 @@ private:
         TraceLocationType::LOCATION_TYPE_TEMPORARY_WORSHIP_SERVICE
     };
 
-    CwaLocationConfiguration _configuration;
+    CwaLocationConfiguration _locationConfiguration;
+    CwaRegenerationConfiguration _regenerationConfiguration;
     QString _currentQrCodePayload;
     bool _qrCodeIndex;
+    State _state;
+    QTimer* _regenerationTimer;
+    QTimer* _remaningRegenerationTimeRefreshTimer;
 
     std::string _generateRandomSeed(uint legth);
-    bool _readConfigFile(QString path);
+    void _readConfigFile(QString path);
     bool _generateQrCodePayload();
+    void _startRegenerationTimer();
     QString _resolvePlayceholders(QString sourceString);
 
 signals:
     void currentQrCodeChanged();
+    void remaningTimeUntilRegenerationChanged();
 
 };
 

@@ -2,12 +2,32 @@
 
 CwaQrCodeGenerator::CwaQrCodeGenerator(QString configFilePath, QObject *parent) : QObject(parent), QQuickImageProvider(QQuickImageProvider::Image)
 {
-    this->_configuration.isValid = false;
+    this->_state = Initializing;
+    this->_locationConfiguration.isValid = false;
     this->_currentQrCodePayload = "";
     this->_qrCodeIndex = false;
 
+    this->_regenerationTimer = new QTimer(this);
+    this->_regenerationTimer->setSingleShot(true);
+    connect(this->_regenerationTimer, &QTimer::timeout, [=] {
+        this->_generateQrCodePayload();
+        this->_startRegenerationTimer();
+    });
+
     this->_readConfigFile(configFilePath);
     this->_generateQrCodePayload();
+    this->_startRegenerationTimer();
+
+    this->_state = Ready;
+
+    this->_remaningRegenerationTimeRefreshTimer = new QTimer(this);
+    this->_remaningRegenerationTimeRefreshTimer->setSingleShot(false);
+    this->_remaningRegenerationTimeRefreshTimer->setInterval(1000);
+    connect(this->_remaningRegenerationTimeRefreshTimer, &QTimer::timeout, [=] {
+        emit this->remaningTimeUntilRegenerationChanged();
+    });
+    this->_remaningRegenerationTimeRefreshTimer->start();
+
 }
 
 void CwaQrCodeGenerator::registerQMLImageProvider(QString configFilePath, QQmlEngine& engine)
@@ -18,60 +38,63 @@ void CwaQrCodeGenerator::registerQMLImageProvider(QString configFilePath, QQmlEn
 }
 
 QVariantMap CwaQrCodeGenerator::currentQrCode() {
-    if (!this->_configuration.isValid) {
+    if (!this->_locationConfiguration.isValid) {
         return {
             {"description", "No valid configuration!"},
             {"address", "Plase check your configuration file!"},
             {"imageUrl", "qrc:/CWA_icon.png"},
-            {"isValid", this->_configuration.isValid}
+            {"isValid", this->_locationConfiguration.isValid}
         };
     }
     else {
         return {
             {"imageUrl", "image://cwaqrcode/" + QString::number(this->_qrCodeIndex)},
-            {"type", this->_configuration.type},
-            {"description", this->_resolvePlayceholders(this->_configuration.description)},
-            {"address", this->_resolvePlayceholders(this->_configuration.address)},
-            {"defaultCheckinLengthInMinutes", this->_configuration.defaultCheckinLengthInMinutes},
-            {"startTimestamp", double(this->_configuration.startTimestamp)},
-            {"endTimestamp", double(this->_configuration.endTimestamp)},
-            {"isValid", this->_configuration.isValid}
+            {"type", this->_locationConfiguration.type},
+            {"description", this->_resolvePlayceholders(this->_locationConfiguration.description)},
+            {"address", this->_resolvePlayceholders(this->_locationConfiguration.address)},
+            {"defaultCheckinLengthInMinutes", this->_locationConfiguration.defaultCheckinLengthInMinutes},
+            {"startTimestamp", double(this->_locationConfiguration.startTimestamp)},
+            {"endTimestamp", double(this->_locationConfiguration.endTimestamp)},
+            {"isValid", this->_locationConfiguration.isValid}
         };
     }
 }
 
-bool CwaQrCodeGenerator::_readConfigFile(QString path) {
+void CwaQrCodeGenerator::_readConfigFile(QString path) {
     QSettings settingsReader(path, QSettings::IniFormat);
     if(settingsReader.status() != QSettings::NoError) {
-        this->_configuration.isValid = false;
-        return false;
+        this->_locationConfiguration.isValid = false;
+        return;
     }
 
-    this->_configuration.type = TraceLocationType(settingsReader.value("location/type", 0).toInt());
-    this->_configuration.description = settingsReader.value("location/description", "").toString();
-    this->_configuration.address = settingsReader.value("location/address", "").toString();
-    this->_configuration.defaultCheckinLengthInMinutes = settingsReader.value("location/defaultCheckinLengthInMinutes", 0).toUInt();
-    this->_configuration.startTimestamp = settingsReader.value("location/startTimestamp", 0).toUInt();
-    this->_configuration.endTimestamp = settingsReader.value("location/endTimestamp", 0).toUInt();
+    this->_locationConfiguration.type = TraceLocationType(settingsReader.value("location/type", 0).toInt());
+    this->_locationConfiguration.description = settingsReader.value("location/description", "").toString();
+    this->_locationConfiguration.address = settingsReader.value("location/address", "").toString();
+    this->_locationConfiguration.defaultCheckinLengthInMinutes = settingsReader.value("location/defaultCheckinLengthInMinutes", 0).toUInt();
+    this->_locationConfiguration.startTimestamp = settingsReader.value("location/startTimestamp", 0).toUInt();
+    this->_locationConfiguration.endTimestamp = settingsReader.value("location/endTimestamp", 0).toUInt();
 
     if (
-        this->_configuration.description.isEmpty() ||
-        this->_configuration.address.isEmpty()
+        this->_locationConfiguration.description.isEmpty() ||
+        this->_locationConfiguration.address.isEmpty()
     )
-        this->_configuration.isValid  = false;
+        this->_locationConfiguration.isValid  = false;
     else if(
-        this->_temporaryLocationTypes.contains(this->_configuration.type) &&
+        this->_temporaryLocationTypes.contains(this->_locationConfiguration.type) &&
         (
-            this->_configuration.startTimestamp == 0 ||
-            this->_configuration.endTimestamp == 0 ||
-            this->_configuration.endTimestamp < this->_configuration.startTimestamp
+            this->_locationConfiguration.startTimestamp == 0 ||
+            this->_locationConfiguration.endTimestamp == 0 ||
+            this->_locationConfiguration.endTimestamp < this->_locationConfiguration.startTimestamp
         )
     )
-        this->_configuration.isValid = false;
+        this->_locationConfiguration.isValid = false;
     else
-        this->_configuration.isValid = true;
+        this->_locationConfiguration.isValid = true;
 
-    return this->_configuration.isValid;
+    this->_regenerationConfiguration.hour = settingsReader.value("regeneration/hour", 4).toInt();
+    this->_regenerationConfiguration.minute = settingsReader.value("regeneration/minute", 0).toInt();
+
+    return;
 }
 
 std::string CwaQrCodeGenerator::_generateRandomSeed(uint legth) {
@@ -123,21 +146,21 @@ QString CwaQrCodeGenerator::_resolvePlayceholders(QString sourceString) {
 }
 
 bool CwaQrCodeGenerator::_generateQrCodePayload() {
-    if (!this->_configuration.isValid)
+    if (!this->_locationConfiguration.isValid)
         return false;
 
     TraceLocation locationData;
     locationData.set_version(1);
     locationData.mutable_description()->assign(
-        this->_resolvePlayceholders(this->_configuration.description).toStdString()
+        this->_resolvePlayceholders(this->_locationConfiguration.description).toStdString()
     );
     locationData.mutable_address()->assign(
-        this->_resolvePlayceholders(this->_configuration.address).toStdString()
+        this->_resolvePlayceholders(this->_locationConfiguration.address).toStdString()
     );
-    if(this->_configuration.startTimestamp > 0)
-        locationData.set_starttimestamp(this->_configuration.startTimestamp);
-    if(this->_configuration.endTimestamp > 0)
-        locationData.set_endtimestamp(this->_configuration.endTimestamp);
+    if(this->_locationConfiguration.startTimestamp > 0)
+        locationData.set_starttimestamp(this->_locationConfiguration.startTimestamp);
+    if(this->_locationConfiguration.endTimestamp > 0)
+        locationData.set_endtimestamp(this->_locationConfiguration.endTimestamp);
 
     CrowdNotifierData crowdNotifierData;
     crowdNotifierData.set_version(1);
@@ -147,8 +170,8 @@ bool CwaQrCodeGenerator::_generateQrCodePayload() {
 
     CWALocationData vendorData;
     vendorData.set_version(1);
-    vendorData.set_type(this->_configuration.type);
-    vendorData.set_defaultcheckinlengthinminutes(this->_configuration.defaultCheckinLengthInMinutes);
+    vendorData.set_type(this->_locationConfiguration.type);
+    vendorData.set_defaultcheckinlengthinminutes(this->_locationConfiguration.defaultCheckinLengthInMinutes);
     std::string serializedVendorData;
     vendorData.SerializeToString(&serializedVendorData);
 
@@ -168,6 +191,36 @@ bool CwaQrCodeGenerator::_generateQrCodePayload() {
     emit this->currentQrCodeChanged();
 
     return true;
+}
+
+void CwaQrCodeGenerator::_startRegenerationTimer() {
+    QDateTime now = QDateTime::currentDateTime();
+    QDateTime timeOfRegeneration = QDateTime::currentDateTime();
+    timeOfRegeneration.setTime(QTime(this->_regenerationConfiguration.hour, this->_regenerationConfiguration.minute));
+
+    if(now.msecsTo(timeOfRegeneration) < 0) {
+        timeOfRegeneration = timeOfRegeneration.addDays(1);
+    }
+
+    qDebug() << "Generating new QR-Code in " << now.msecsTo(timeOfRegeneration);
+    this->_regenerationTimer->setInterval(now.msecsTo(timeOfRegeneration));
+    this->_regenerationTimer->start();
+}
+
+QString CwaQrCodeGenerator::remaningTimeUntilRegeneration() {
+    int remaningSeconds = this->_regenerationTimer->remainingTime() / 1000;
+    int remaningMinutes = remaningSeconds / 60;
+    int remaningHours = remaningMinutes / 60;
+
+    if(remaningHours > 0) {
+        return QString::number(remaningHours) + " Stunden.";
+    }
+    else if(remaningMinutes > 0) {
+        return QString::number(remaningMinutes) + " Minuten.";
+    }
+    else {
+        return QString::number(remaningSeconds) + " Sekunden.";
+    }
 }
 
 QImage CwaQrCodeGenerator::requestImage(const QString &id, QSize *size, const QSize &requestedSize) {

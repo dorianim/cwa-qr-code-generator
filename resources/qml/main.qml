@@ -80,7 +80,8 @@ Window {
                         }
 
                         Label {
-                            height: qrCodeOutline.margins * 0.15
+                            id: qrCodeAddressLabel
+                            height: qrCodeOutline.margins * 0.12
                             width: qrCodeOutline.width
 
                             elide: Text.ElideRight
@@ -117,6 +118,22 @@ Window {
                     }
                 }
             }
+        }
+
+        Label {
+            anchors {
+                bottom: parent.bottom
+                bottomMargin: height * 0.5
+                horizontalCenter: parent.horizontalCenter
+            }
+
+            height: qrCodeAddressLabel.height * 0.7
+
+            font.pixelSize: height
+            font.family: defaultFont.name
+
+            text: "Neuer QR-Code in " + CwaQrCodeGenerator.remaningTimeUntilRegeneration
+
         }
 
         function landscape() {
