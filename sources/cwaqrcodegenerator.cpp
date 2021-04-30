@@ -60,9 +60,16 @@ QVariantMap CwaQrCodeGenerator::currentQrCode() {
     }
 }
 
+QVariantMap CwaQrCodeGenerator::guiConfiguration() {
+    return {
+        {"swapAfterMinutes", this->_guiConfiguration.swapAfterMinutes}
+    };
+}
+
 void CwaQrCodeGenerator::_readConfigFile(QString path) {
     QSettings settingsReader(path, QSettings::IniFormat);
     if(settingsReader.status() != QSettings::NoError) {
+        qDebug() << "Error reading configuration: " << settingsReader.status();
         this->_locationConfiguration.isValid = false;
         return;
     }
@@ -93,6 +100,8 @@ void CwaQrCodeGenerator::_readConfigFile(QString path) {
 
     this->_regenerationConfiguration.hour = settingsReader.value("regeneration/hour", 4).toInt();
     this->_regenerationConfiguration.minute = settingsReader.value("regeneration/minute", 0).toInt();
+
+    this->_guiConfiguration.swapAfterMinutes = settingsReader.value("gui/swapAfterMinutes", 0).toInt();
 
     return;
 }

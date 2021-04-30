@@ -1,7 +1,7 @@
 # This file should contain your qr-code configuration
 
 [location]
-type=9
+type=3
 # Avaiable types:
 #  Unspecified: 0
 # -- Places --
@@ -23,15 +23,16 @@ type=9
 # Available macros:
 # - {{date%<format>}} where <format> is in the format described here: https://doc.qt.io/qt-5/qdate.html#toString-2
 # - {{time%<format>}} where <format> is in the format described here: https://doc.qt.io/qt-5/qdatetime.html#toString-2
-description=Beispiel check-in am {{date%dd.MM.yyyy}}
-address=Beispiel Adresse (generiert am {{date%dd.MM.yyyy}} um {{time%hh:mm}})
+description="Beispiel check-in am {{date%dd.MM.yyyy}}"
+address="Beispiel Adresse (generiert am {{date%dd.MM.yyyy}} um {{time%hh:mm}})"
 defaultCheckinLengthInMinutes=120
 
 # Only for events:
 #   These are UNIX timestamps. You can generate one
 #   over here: https://www.epochconverter.com/
-startTimestamp=1619502509
-endTimestamp=1619675309
+#   (To use, remove the # in front of the line)
+#startTimestamp=1619502509
+#endTimestamp=1619675309
 
 [regeneration]
 # The QR code will be regenerated at this time every day.
@@ -39,3 +40,8 @@ endTimestamp=1619675309
 # at 00:00 once they are plugged into power.
 hour=4
 minute=0
+
+[gui]
+# Swap the two display halfes, Qr Code and Disclaimer after a period of time
+# to prevent burn-in on older monitors
+swapAfterMinutes=1

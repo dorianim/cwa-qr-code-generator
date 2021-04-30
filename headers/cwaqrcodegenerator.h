@@ -27,6 +27,8 @@ class CwaQrCodeGenerator : public QObject, public QQuickImageProvider
     Q_OBJECT
     Q_PROPERTY(QVariant currentQrCode READ currentQrCode NOTIFY currentQrCodeChanged)
     Q_PROPERTY(QString remaningTimeUntilRegeneration READ remaningTimeUntilRegeneration NOTIFY remaningTimeUntilRegenerationChanged)
+    Q_PROPERTY(QVariantMap guiConfiguration READ guiConfiguration NOTIFY guiConfigurationChanged)
+
 public:
     explicit CwaQrCodeGenerator(QString configFilePath, QObject *parent = nullptr);
 
@@ -40,6 +42,7 @@ public:
     Q_INVOKABLE QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize);
     Q_INVOKABLE QVariantMap currentQrCode();
     Q_INVOKABLE QString remaningTimeUntilRegeneration();
+    Q_INVOKABLE QVariantMap guiConfiguration();
 
 private:
     typedef struct CwaLocationConfiguration {
@@ -57,6 +60,10 @@ private:
         int minute;
     } cwaRegenerationConfiguration_t;
 
+    typedef struct CwaGuiConfiguration {
+        int swapAfterMinutes;
+    } cwaGuiConfiguration_t;
+
     const QList<TraceLocationType> _temporaryLocationTypes = {
         TraceLocationType::LOCATION_TYPE_PERMANENT_OTHER,
         TraceLocationType::LOCATION_TYPE_TEMPORARY_CULTURAL_EVENT,
@@ -67,6 +74,7 @@ private:
 
     CwaLocationConfiguration _locationConfiguration;
     CwaRegenerationConfiguration _regenerationConfiguration;
+    CwaGuiConfiguration _guiConfiguration;
     QString _currentQrCodePayload;
     bool _qrCodeIndex;
     State _state;
@@ -82,6 +90,7 @@ private:
 signals:
     void currentQrCodeChanged();
     void remaningTimeUntilRegenerationChanged();
+    void guiConfigurationChanged();
 
 };
 

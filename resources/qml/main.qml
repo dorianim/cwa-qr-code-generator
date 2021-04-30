@@ -12,6 +12,8 @@ Window {
     Page {
         id: app
 
+        property bool swappedLayout: false
+
         anchors.fill: parent
 
         FontLoader {
@@ -19,15 +21,64 @@ Window {
             source: "qrc:/Roboto-Regular.ttf"
         }
 
-        GridLayout {
+        Timer {
+            id: layoutSwapTimer
+            interval: CwaQrCodeGenerator.guiConfiguration.swapAfterMinutes * 60 * 1000
+            repeat: true
+            running: true
+            onTriggered: app.swappedLayout = !app.swappedLayout
+        }
+
+        Item {
             anchors.fill: parent
 
-            rows: app.landscape() ? 1:2
-            columns: app.landscape() ? 2:1
+            ColumnLayout {
+                x: app.landscape() ? app.swappedLayout ? 0 : parent.width * 0.5 : 0
+                y: app.landscape() ? 0 : app.swappedLayout ? 0 : parent.height * 0.6
+
+                height: app.landscape() ? parent.height : parent.height * 0.4
+                width: app.landscape() ? parent.width * 0.5 : parent.width
+
+                Item {
+                    Layout.preferredWidth: app.landscape() ? parent.width : parent.width
+                    Layout.maximumWidth: app.landscape() ? -1 : qrCodeOutline.width * 1.2
+                    Layout.preferredHeight: app.landscape() ? parent.height : parent.height
+                    Layout.alignment: Layout.Center
+
+                    Image {
+                        anchors.fill: parent
+                        anchors.margins: app.landscape() ? parent.width * 0.1 : parent.height * 0.1
+
+                        fillMode: Image.PreserveAspectFit
+
+                        antialiasing: true
+                        mipmap: true
+
+                        source: "qrc:/pt-poster-qr-disclaimer.png"
+                    }
+                }
+
+                Behavior on x {
+                    NumberAnimation {
+                        duration: 7000
+                        easing.type: Easing.InOutQuart
+                    }
+                }
+
+                Behavior on y {
+                    NumberAnimation {
+                        duration: 7000
+                        easing.type: Easing.InOutQuart
+                    }
+                }
+            }
 
             ColumnLayout {
-                Layout.preferredHeight: app.landscape() ? parent.height : parent.height * 0.6
-                Layout.preferredWidth: app.landscape() ? parent.width * 0.5 : parent.width
+                x: app.landscape() ? app.swappedLayout ? parent.width * 0.5 : 0 : 0
+                y: app.landscape() ? 0 : app.swappedLayout ? parent.height * 0.4 : 0
+
+                height: app.landscape() ? parent.height : parent.height * 0.6
+                width: app.landscape() ? parent.width * 0.5 : parent.width
 
                 Item {
                     id: qrCodeContainer
@@ -64,7 +115,6 @@ Window {
                                 sourceSize.width: width
                                 sourceSize.height: width
                             }
-
                         }
 
                         Label {
@@ -93,30 +143,21 @@ Window {
                         }
                     }
                 }
-            }
 
-            ColumnLayout {
-                Layout.preferredHeight: app.landscape() ? parent.height : parent.height * 0.4
-                Layout.preferredWidth: app.landscape() ? parent.width * 0.5 : parent.width
-
-                Item {
-                    Layout.preferredWidth: app.landscape() ? parent.width : parent.width
-                    Layout.maximumWidth: app.landscape() ? -1 : qrCodeOutline.width * 1.2
-                    Layout.preferredHeight: app.landscape() ? parent.height : parent.height
-                    Layout.alignment: Layout.Center
-
-                    Image {
-                        anchors.fill: parent
-                        anchors.margins: app.landscape() ? parent.width * 0.1 : parent.height * 0.1
-
-                        fillMode: Image.PreserveAspectFit
-
-                        antialiasing: true
-                        mipmap: true
-
-                        source: "qrc:/pt-poster-qr-disclaimer.png"
+                Behavior on x {
+                    NumberAnimation {
+                        duration: 7000
+                        easing.type: Easing.InOutQuart
                     }
                 }
+
+                Behavior on y {
+                    NumberAnimation {
+                        duration: 7000
+                        easing.type: Easing.InOutQuart
+                    }
+                }
+
             }
         }
 

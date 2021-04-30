@@ -1,5 +1,5 @@
 # cwa-qr-code-generator
-This is a simple program which is intended to be used to generate event qr codes for the [corona-warn-app]() automatically.
+This is a simple program which is intended to be used to generate event qr codes for the [corona-warn-app](https://coronawarn.app) automatically.
 Its intended use is for permanent facilites. They can install this program on an embedded device (like a Raspberry pi) and it will automatically regerate a valid qr code once a day.
 
 # Configuration
