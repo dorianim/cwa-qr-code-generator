@@ -69,6 +69,8 @@ QVariantMap CwaQrCodeGenerator::guiConfiguration() {
 
 void CwaQrCodeGenerator::_readConfigFile(QString path) {
     QSettings settingsReader(path, QSettings::IniFormat);
+    settingsReader.setIniCodec("UTF-8");
+
     if(settingsReader.status() != QSettings::NoError) {
         qDebug() << "Error reading configuration: " << settingsReader.status();
         this->_locationConfiguration.isValid = false;

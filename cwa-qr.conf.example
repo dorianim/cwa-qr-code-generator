@@ -24,7 +24,7 @@ type=3
 # - {{date%<format>}} where <format> is in the format described here: https://doc.qt.io/qt-5/qdate.html#toString-2
 # - {{time%<format>}} where <format> is in the format described here: https://doc.qt.io/qt-5/qdatetime.html#toString-2
 description="Beispiel check-in am {{date%dd.MM.yyyy}}"
-address="Beispiel Adresse (generiert am {{date%dd.MM.yyyy}} um {{time%hh:mm}})"
+address="Beispiel Ort, Beispiel Straße 3"
 defaultCheckinLengthInMinutes=120
 
 # Only for events:
@@ -46,4 +46,4 @@ minute=0
 # to prevent burn-in on older monitors
 swapAfterMinutes=1
 # Duration of the swap animation in milliseconds. 0 means no animation.
-swapAnimationDuration=0
+swapAnimationDuration=7000
