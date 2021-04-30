@@ -62,6 +62,7 @@ private:
 
     typedef struct CwaGuiConfiguration {
         int swapAfterMinutes;
+        int swapAnimationDuration;
     } cwaGuiConfiguration_t;
 
     const QList<TraceLocationType> _temporaryLocationTypes = {

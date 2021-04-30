@@ -45,3 +45,5 @@ minute=0
 # Swap the two display halfes, Qr Code and Disclaimer after a period of time
 # to prevent burn-in on older monitors
 swapAfterMinutes=1
+# Duration of the swap animation in milliseconds. 0 means no animation.
+swapAnimationDuration=0

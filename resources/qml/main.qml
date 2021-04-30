@@ -60,14 +60,14 @@ Window {
 
                 Behavior on x {
                     NumberAnimation {
-                        duration: 7000
+                        duration: CwaQrCodeGenerator.guiConfiguration.swapAnimationDuration
                         easing.type: Easing.InOutQuart
                     }
                 }
 
                 Behavior on y {
                     NumberAnimation {
-                        duration: 7000
+                        duration: CwaQrCodeGenerator.guiConfiguration.swapAnimationDuration
                         easing.type: Easing.InOutQuart
                     }
                 }
@@ -146,14 +146,14 @@ Window {
 
                 Behavior on x {
                     NumberAnimation {
-                        duration: 7000
+                        duration: CwaQrCodeGenerator.guiConfiguration.swapAnimationDuration
                         easing.type: Easing.InOutQuart
                     }
                 }
 
                 Behavior on y {
                     NumberAnimation {
-                        duration: 7000
+                        duration: CwaQrCodeGenerator.guiConfiguration.swapAnimationDuration
                         easing.type: Easing.InOutQuart
                     }
                 }

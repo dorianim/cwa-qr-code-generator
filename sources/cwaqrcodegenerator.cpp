@@ -62,7 +62,8 @@ QVariantMap CwaQrCodeGenerator::currentQrCode() {
 
 QVariantMap CwaQrCodeGenerator::guiConfiguration() {
     return {
-        {"swapAfterMinutes", this->_guiConfiguration.swapAfterMinutes}
+        {"swapAfterMinutes", this->_guiConfiguration.swapAfterMinutes},
+        {"swapAnimationDuration", this->_guiConfiguration.swapAnimationDuration}
     };
 }
 
@@ -102,6 +103,7 @@ void CwaQrCodeGenerator::_readConfigFile(QString path) {
     this->_regenerationConfiguration.minute = settingsReader.value("regeneration/minute", 0).toInt();
 
     this->_guiConfiguration.swapAfterMinutes = settingsReader.value("gui/swapAfterMinutes", 0).toInt();
+    this->_guiConfiguration.swapAnimationDuration = settingsReader.value("gui/swapAnimationDuration", 0).toInt();
 
     return;
 }
