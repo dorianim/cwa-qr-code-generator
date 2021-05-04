@@ -10,7 +10,7 @@ Its intended use is for permanent facilites. They can install this program on an
   - `{{time%hh:mm:ss}}` replaced with the current time in format `hh:mm:ss`, format is described [here](https://doc.qt.io/qt-5/qdatetime.html#toString-2)
 
 # Building
-To build this, you need to have Qt Creator with Qt 5.15.2 and protobuf installed on your system. You can then use the Qt creaor for building.
+To build this, you need to have Qt Creator with Qt 5.15.2 and protobuf installed on your system. You can then use the Qt creator for building.
 
 # Screenshots
 <div>
